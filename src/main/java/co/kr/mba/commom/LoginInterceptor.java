@@ -13,29 +13,33 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import co.kr.mba.service.Apiservice;
 
+public class LoginInterceptor extends HandlerInterceptorAdapter {
 
-public class LoginInterceptor extends HandlerInterceptorAdapter{
+    @Autowired
+    Apiservice service;
 
-	@Autowired
-	Apiservice service;
-    public boolean preHandle(Model model , HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-    
-        //admin 세션key 존재시 main 페이지 이동
+    public boolean preHandle(Model model, HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
+
+        // admin 세션key 존재시 main 페이지 이동123
         return false;
     }
- 
+
     @Override
-    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-    	super.postHandle(request, response, handler, modelAndView);
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
+            ModelAndView modelAndView) throws Exception {
+        super.postHandle(request, response, handler, modelAndView);
     }
- 
+
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
+            throws Exception {
         super.afterCompletion(request, response, handler, ex);
     }
- 
+
     @Override
-    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         super.afterConcurrentHandlingStarted(request, response, handler);
     }
 }

@@ -38,54 +38,52 @@ public class AdminController {
 	Adminservice adminService;
 	@Autowired
 	MappingJackson2JsonView jsonView;
-	
+
 	public int pages = 20;
-	
-	
-	private FileDownloadView downloadView;	// 파일 다운로드 뷰 
-	
+
+	private FileDownloadView downloadView; // 파일 다운로드 뷰 1
+
 	@Autowired
 	public void setDownloadView(FileDownloadView view) {
 		downloadView = view;
 	}
 
+	private String saveFile(MultipartFile file, HttpSession session) {
+		// 파일 이름 변경
+		UUID uuid = UUID.randomUUID();
+		String saveName = uuid + "_" + file.getOriginalFilename();
+		String defaultPath = session.getServletContext().getRealPath("/");
+		String fileRoot = "C:\\groupimg\\";
+		// 저장할 File 객체를 생성(껍데기 파일)ㄴ
+		File saveFile = new File(fileRoot, saveName); // 저장할 폴더 이름, 저장할 파일 이름
 
-	
-	private String saveFile(MultipartFile file,HttpSession session){
-	    // 파일 이름 변경
-	    UUID uuid = UUID.randomUUID();
-	    String saveName = uuid + "_" + file.getOriginalFilename();
-	    String defaultPath = session.getServletContext().getRealPath("/");
-		String fileRoot = "C:\\groupimg\\";	
-	    // 저장할 File 객체를 생성(껍데기 파일)ㄴ
-	    File saveFile = new File(fileRoot,saveName); // 저장할 폴더 이름, 저장할 파일 이름
+		try {
+			file.transferTo(saveFile); // 업로드 파일에 saveFile이라는 껍데기 입힘
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 
-	    try {
-	        file.transferTo(saveFile); // 업로드 파일에 saveFile이라는 껍데기 입힘
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	        return null;
-	    }
+		return saveName;
+	}
 
-	    return saveName;
-	} 
-	
-	
 	public String donaimgsave(MultipartFile file) {
-		String fileRoot = "C:\\groupimg\\";	//저장될 외부 파일 경로
-		String originalFileName = file.getOriginalFilename();	//오리지날 파일명
-		String orifilenameonly= originalFileName.substring(0,originalFileName.lastIndexOf("."));	
-		String extension = originalFileName.substring(originalFileName.lastIndexOf("."));	//파일 확장자
-		String savedFileName = orifilenameonly +"_"+UUID.randomUUID().toString().substring(0,5)+ extension;	//저장될 파일 명
-		File targetFile = new File(fileRoot + savedFileName);	
+		String fileRoot = "C:\\groupimg\\"; // 저장될 외부 파일 경로
+		String originalFileName = file.getOriginalFilename(); // 오리지날 파일명
+		String orifilenameonly = originalFileName.substring(0, originalFileName.lastIndexOf("."));
+		String extension = originalFileName.substring(originalFileName.lastIndexOf(".")); // 파일 확장자
+		String savedFileName = orifilenameonly + "_" + UUID.randomUUID().toString().substring(0, 5) + extension; // 저장될
+																													// 파일
+																													// 명
+		File targetFile = new File(fileRoot + savedFileName);
 		try {
 			InputStream fileStream = file.getInputStream();
-			FileUtils.copyInputStreamToFile(fileStream, targetFile);	//파일 저장
+			FileUtils.copyInputStreamToFile(fileStream, targetFile); // 파일 저장
 		} catch (IOException e) {
-			FileUtils.deleteQuietly(targetFile);	//저장된 파일 삭제
+			FileUtils.deleteQuietly(targetFile); // 저장된 파일 삭제
 			e.printStackTrace();
 		}
 		return savedFileName;
 	}
-	
+
 }
