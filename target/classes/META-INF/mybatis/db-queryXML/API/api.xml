@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.mba.dao.Apidao">
+
+	<select id="s_urllist" parameterType="hashmap" resultType="hashmap">
+		SELECT urllist.list_seq AS list_seq , rss_name,rssurl,iconimg,flag,add_date,
+		if(ncnt IS NULL,0,ncnt) AS ncnt,
+		if(acnt IS NULL,0,acnt) AS acnt FROM (
+		SELECT * FROM urllist 
+			WHERE cate2_seq IN(
+			SELECT cate2_seq FROM cate2
+			WHERE cate1_seq IN (
+			select cate1_seq from cate1
+			WHERE id =#{id}))
+		) 
+		as urllist LEFT OUTER join
+		(
+		SELECT a.list_seq AS list_seq,acnt,if(ncnt IS NULL,0,ncnt) AS ncnt FROM (
+		SELECT list_seq,COUNT(*) AS acnt FROM  rss
+		GROUP BY list_seq
+		) AS a LEFT OUTER join
+		(
+		SELECT list_seq,COUNT(*) ncnt  from rss
+		WHERE DATE >= Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0
+		GROUP BY LIST_seq
+		) AS b
+		on a.list_seq = b.list_seq
+		) AS c
+		on urllist.list_seq = c.list_seq
+		ORDER BY add_date desc
+	</select>
+	<select id="s_urllist_one" parameterType="hashmap" resultType="hashmap">
+		select * from urllist 
+		where list_seq=#{seq}
+	</select>
+	
+	<insert id="i_urllist" parameterType="hashmap">
+		insert into urllist(rssurl,flag,add_date,rss_name,cate2_seq)
+		values(#{rssurl},0,now(),'검색중입니다.',${cate2_seq})
+	</insert>
+	
+	<update id="u_urllist" parameterType="hashmap">
+		update urllist set
+		rss_name = #{rss_name},
+		iconimg = #{iconimg},
+		flag = #{flag}
+		where list_seq = #{seq}
+	</update>
+
+
+	<insert id="i_rss" parameterType="hashmap">
+	
+		insert into rss(list_seq, url ,title,date,media,media_icon,media_url,contents,img)
+		values(#{list_seq},#{url},#{title},#{date},#{media},#{media_icon},#{media_url},#{contents},#{img})
+	</insert>
+
+	
+	<select id="s_urllist_send" parameterType="hashmap" resultType="hashmap">
+		select list_seq as no , rssurl as url , flag from urllist
+		where flag = 0
+		LIMIT 0 , 1
+	</select>
+	
+	
+	
+	<select id="s_rss_one" parameterType="hashmap" resultType="hashmap">
+		
+		SELECT 
+		url_seq,a.list_seq,url,title,dateday,DATETIME,media,media_icon,media_url,contents,img,DATE,(title REGEXP lang OR contents REGEXP lang) AS lang  
+		FROM (	select url_seq,list_seq,url,title,Date_format(DATE,'%Y-%m-%d')as dateday,if(Date_format(DATE,'%H:%i:%S')='00:00:00','', Date_format(DATE,'%H:%i:%S')   )  as DATETIME,media,media_icon,media_url,contents,img,date  from rss
+		where list_seq = #{seq}
+		and DATE >= Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0) AS a left outer JOIN (select list_seq, group_concat(filter_lang SEPARATOR '|')AS lang from filter group by list_seq) as filter
+		on a.list_seq = filter.list_seq
+		ORDER BY date desc,url_seq desc
+		
+			
+	</select>
+	<select id="s_rss_one_old" parameterType="hashmap" resultType="hashmap">
+		
+		
+		
+		SELECT 
+		url_seq,a.list_seq,url,title,dateday,DATETIME,media,media_icon,media_url,contents,img,DATE,(title REGEXP lang OR contents REGEXP lang) AS lang  
+		FROM (	select url_seq,list_seq,url,title,Date_format(DATE,'%Y-%m-%d')as dateday,if(Date_format(DATE,'%H:%i:%S')='00:00:00','', Date_format(DATE,'%H:%i:%S')   )  as DATETIME,media,media_icon,media_url,contents,img,date  from rss
+		where list_seq = #{seq}
+		and DATE &lt; Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0) AS a left outer JOIN (select list_seq, group_concat(filter_lang SEPARATOR '|')AS lang from filter group by list_seq) as filter
+		on a.list_seq = filter.list_seq
+		ORDER BY date desc,url_seq desc
+		limit #{page}, #{rows}
+	</select>
+	<select id="s_rss_one_oldsum" parameterType="hashmap" resultType="int">
+		SELECT 
+		COUNT(*) 
+		FROM (	select url_seq,list_seq,url,title,Date_format(DATE,'%Y-%m-%d')as dateday,if(Date_format(DATE,'%H:%i:%S')='00:00:00','', Date_format(DATE,'%H:%i:%S')   )  as DATETIME,media,media_icon,media_url,contents,img,date  from rss
+		where list_seq = #{seq}
+		and DATE &lt; Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0) AS a left outer JOIN (select list_seq, group_concat(filter_lang SEPARATOR '|')AS lang from filter group by list_seq) as filter
+		on a.list_seq = filter.list_seq
+		ORDER BY date desc,url_seq desc
+	</select>
+	
+	<select id="s_rss_all" parameterType="hashmap" resultType="hashmap">
+		SELECT url_seq,a.list_seq,url,title,dateday,DATETIME,media,media_icon,media_url,contents,img,DATE,rss_name,rssurl,(title REGEXP lang OR contents REGEXP lang) AS lang  FROM (
+		SELECT url_seq,list_seq,url,title,Date_format(DATE,'%Y-%m-%d')as dateday,if(Date_format(DATE,'%H:%i:%S')='00:00:00','', Date_format(DATE,'%H:%i:%S')   )  as DATETIME,media,media_icon,media_url,contents,img,date   from rss
+		where DATE >= Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0
+		) AS a
+		left outer JOIN (SELECT urllist.list_seq,urllist.rss_name,urllist.rssurl,filter.lang FROM urllist left outer JOIN (select list_seq, group_concat(filter_lang SEPARATOR '|')AS lang from filter group by list_seq) AS filter
+		on urllist.list_seq = filter.list_seq)as urllist
+		on a.list_seq = urllist.list_seq
+		ORDER BY DATE desc,url_seq desc
+	</select>
+	<select id="s_rss_all_old" parameterType="hashmap" resultType="hashmap">
+		SELECT url_seq,a.list_seq,url,title,dateday,DATETIME,media,media_icon,media_url,contents,img,DATE,rss_name,rssurl,(title REGEXP lang OR contents REGEXP lang) AS lang  FROM (
+		SELECT url_seq,list_seq,url,title,Date_format(DATE,'%Y-%m-%d')as dateday,if(Date_format(DATE,'%H:%i:%S')='00:00:00','', Date_format(DATE,'%H:%i:%S')   )  as DATETIME,media,media_icon,media_url,contents,img,date  from rss
+		where DATE &lt; Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0
+		) AS a
+		left outer JOIN (SELECT urllist.list_seq,urllist.rss_name,urllist.rssurl,filter.lang FROM urllist left outer JOIN (select list_seq, group_concat(filter_lang SEPARATOR '|')AS lang from filter group by list_seq) AS filter
+		on urllist.list_seq = filter.list_seq)as urllist
+		on a.list_seq = urllist.list_seq
+		ORDER BY DATE desc,url_seq desc
+	</select>
+	
+	<update id="du_rss" parameterType="hashmap">
+		update rss set
+		d_flag = 1
+		where url_seq = #{seq}
+	
+	</update>
+
+
+	<select id="s_rss_import" parameterType="hashmap" resultType="hashmap">
+		select * from rss 
+		where url_seq in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")" >
+			#{item}
+		</foreach>
+	</select>
+
+	<delete id="d_urllist" parameterType="hashmap">
+		delete from urllist 
+		where list_seq = #{seq}
+	</delete>
+	<delete id="d_rss" parameterType="hashmap">
+		delete from rss 
+		where list_seq = #{seq}
+	</delete>
+	
+	<select id="s_rssexists" parameterType="hashmap" resultType="int">
+		select EXISTS (select url_seq from rss where url=#{url} and list_seq =#{seq} limit 1)
+	
+	</select>
+	
+	<update id="u_urllist_flagall" parameterType="hashmap">
+		update urllist set
+		flag = 0 
+	</update>
+	<update id="u_urllist_flag" parameterType="hashmap">
+		update urllist set
+		flag = 0 
+		where list_seq = #{seq}
+	</update>
+	
+	
+	<select id="s_filter" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM (
+		SELECT cate1.cate1_seq,cate1.cate1_name,cate2.cate2_name,cate2.cate2_seq FROM (SELECT * from cate1 WHERE id = #{id}) as cate1 JOIN cate2
+		WHERE cate1.cate1_seq = cate2.cate1_seq) cate22 JOIN urllist
+		WHERE cate22.cate2_Seq = urllist.cate2_seq
+	
+	</select>
+	
+	<insert id="i_filter" parameterType="hashmap">
+		insert into filter(list_seq , filter_lang)
+		values(#{seq},#{lang})
+	
+	</insert>
+	
+	<delete id="d_filter" parameterType="hashmap">
+		delete from filter
+		where list_seq = #{seq}
+		and filter_lang = #{lang}
+	</delete>
+	
+	
+	
+	
+	<!--  카데고리 -->
+	
+	<select id="s_cate1" parameterType="hashmap" resultType="hashmap">
+		select * from cate1
+		where id= #{id}
+	</select>
+	<insert id="i_cate1" parameterType="hashmap">
+		insert into cate1(cate1_name,id)
+		values(#{cate1_name},#{id})
+	</insert>
+	
+	<select id="s_cate2" parameterType="string" resultType="hashmap">
+		SELECT b.cate2_seq,b.cate2_name FROM cate1 AS a JOIN cate2 AS b
+		WHERE a.cate1_seq = b.cate1_seq
+		AND a.cate1_seq = #{cate1_seq}
+	</select>
+	<select id="s_cate3" parameterType="string" resultType="hashmap">
+		SELECT urllist.list_seq AS list_seq , rss_name,rssurl,iconimg,flag,add_date,
+		if(ncnt IS NULL,0,ncnt) AS ncnt,
+		if(acnt IS NULL,0,acnt) AS acnt FROM (SELECT * from urllist WHERE cate2_seq = #{cate2_seq}) AS urllist LEFT OUTER join
+		(
+		SELECT a.list_seq AS list_seq,acnt,if(ncnt IS NULL,0,ncnt) AS ncnt FROM (
+		SELECT list_seq,COUNT(*) AS acnt FROM  rss
+		GROUP BY list_seq
+		) AS a LEFT OUTER join
+		(
+		SELECT list_seq,COUNT(*) ncnt  from rss
+		WHERE DATE >= Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0
+		GROUP BY LIST_seq
+		) AS b
+		on a.list_seq = b.list_seq
+		) AS c
+		on urllist.list_seq = c.list_seq
+		ORDER BY add_date desc
+		
+	</select>
+	
+	<insert id="i_cate2" parameterType="hashmap">
+		insert into cate2(cate2_name,cate1_seq)
+		values(#{cate2_name},#{cate1_seq})
+	</insert>
+	
+	<select id="s_catesideractive" parameterType="hashmap" resultType="hashmap">
+	SELECT * FROM cate2 
+		WHERE cate2_seq = (
+		SELECT cate2_seq FROM urllist
+		WHERE list_seq = #{seq})
+	</select>
+	
+	
+	<select id="s_urllistnull" parameterType="hashmap" resultType="hashmap">
+		select * from urllist
+		where cate2_seq is null
+	</select>
+	
+	
+	
+	<update id="u_rsslist_addcate" parameterType="hashmap">
+		update urllist set
+		cate2_seq = #{cate2_seq}
+		where list_seq = #{list_seq}
+		
+	
+	</update>
+	
+	<select id="s_test" resultType="hashmap">
+	
+		select * from test
+	
+	</select>
+	
+	
+	
+	<!--  카데고리 -->
+	
+	<update id="u_cate1" parameterType="hashmap">
+		UPDATE cate1 SET
+		cate1_name = #{name}
+		WHERE cate1_seq = #{seq}
+	</update>
+	<delete id="d_cate1" parameterType="hashmap">
+		DELETE FROM cate1
+		WHERE cate1_seq = #{seq}
+		
+	</delete>
+	<update id="u_cate2" parameterType="hashmap">
+		UPDATE cate2 SET
+		cate2_name = #{name}
+		WHERE cate2_seq = #{seq}
+	</update>
+	<delete id="d_cate2" parameterType="hashmap">
+		DELETE FROM cate2
+		WHERE cate2_seq = #{seq}
+	</delete>
+	<update id="u_urllist_cate2" parameterType="hashmap">
+		UPDATE urllist SET
+		cate2_seq = null
+		WHERE cate2_seq = #{seq}
+	</update>
+	<delete id="d_cate2_cate1" parameterType="hashmap">
+		delete FROM cate2
+		WHERE cate1_seq =  #{seq}
+	</delete>
+	<update id="u_urllist_cate1" parameterType="hashmap">
+		UPDATE urllist SET
+		cate2_seq = null
+		WHERE cate2_seq IN (SELECT cate2_seq FROM cate2 WHERE cate1_seq =#{seq})
+	</update>
+	
+	<select id="select_user_all" parameterType="String" resultType="hashmap">
+		select id,password,security_code,name
+		from user
+		where id = #{id}
+	</select>
+	<select id="select_user_protec" parameterType="String" resultType="hashmap">
+		select id,name
+		from user
+		where id = #{id}
+	</select>
+	
+	<select id="test_query" parameterType="hashmap" resultType="hashmap">
+		SELECT * FROM (
+		SELECT cate1.cate1_seq,cate1.cate1_name,cate2.cate2_name,cate2.cate2_seq FROM cate1 JOIN cate2
+		WHERE cate1.cate1_seq = cate2.cate1_seq) as cate JOIN urllist
+		WHERE cate.cate2_seq = urllist.cate2_seq
+		
+	</select>
+	
+	
+	<select id="s_t1" parameterType="hashmap" resultType="hashmap">
+		select * from cate1
+	</select>
+	<select id="s_t2" parameterType="hashmap" resultType="hashmap">
+		SELECT cate1.cate1_seq,cate1.cate1_name,cate2.cate2_name,cate2.cate2_seq FROM cate1 JOIN cate2
+		WHERE cate1.cate1_seq = cate2.cate1_seq
+	</select>
+	<select id="s_t3" parameterType="hashmap" resultType="hashmap">
+		SELECT urllist.list_seq AS list_seq , rss_name,rssurl,iconimg,flag,add_date,cate2_seq,
+		if(ncnt IS NULL,0,ncnt) AS ncnt,
+		if(acnt IS NULL,0,acnt) AS acnt FROM (SELECT * from urllist) AS urllist LEFT OUTER join
+		(
+		SELECT a.list_seq AS list_seq,acnt,if(ncnt IS NULL,0,ncnt) AS ncnt FROM (
+		SELECT list_seq,COUNT(*) AS acnt FROM  rss
+		GROUP BY list_seq
+		) AS a LEFT OUTER join
+		(
+		SELECT list_seq,COUNT(*) ncnt  from rss
+		WHERE DATE >= Date_format(DATE_SUB(NOW(), INTERVAL 1 DAY),'%Y-%m-%d 06:00:00')
+		and d_flag = 0
+		GROUP BY LIST_seq
+		) AS b
+		on a.list_seq = b.list_seq
+		) AS c
+		on urllist.list_seq = c.list_seq
+		ORDER BY add_date desc
+	</select>
+	
+	<update id="u_mypage" parameterType="hashmap">
+		UPDATE user SET
+		name = #{name},
+		password = #{new_pwd}
+		WHERE id = #{id}
+	</update>
+
+	<select id="s_join_match" parameterType="hashmap" resultType="int">
+		select EXISTS (select * from user where id=#{id} limit 1) as success
+	</select>
+	<insert id="i_join" parameterType="hashmap">
+		insert into user(id, password,name,add_date,security_code)
+		values(#{id},#{pwd},#{name},now(),'ROLE_USER')
+	</insert>
+	
+
+</mapper>
+	

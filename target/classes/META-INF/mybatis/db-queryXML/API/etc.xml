@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.mba.dao.Etcdao">
+	
+	<select id="select_donation" parameterType="hashmap" resultType="hashmap">
+		select donation_company, Date_format(donation_date,"%Y-%m-%d") as donation_date,donation_seq,donation_name,donation_class,donation_img,donation_pay
+		 from donation_tb 
+	</select>
+	
+	
+	<select id="select_journal" parameterType="hashmap" resultType="hashmap">
+		select * from journal_tb
+		ORDER BY journal_date desc
+	
+	</select>
+	<select id="select_journal_seq" parameterType="hashmap" resultType="hashmap">
+		select * from journal_tb
+		where journal_seq = #{seq}
+	
+	</select>
+
+	<insert id="insert_journal" parameterType="hashmap">
+		insert into journal_tb(id,journal_title,journal_subimg,journal_file,journal_date)
+		values(#{id},#{title},#{img},#{file},now())
+	
+	</insert>
+	<update id="update_journal" parameterType="hashmap">
+		update journal_tb set
+		journal_title = #{title}
+		<if test='img != null'>
+			,journal_subimg = #{img}
+		</if>
+		<if test='file != null'>
+			,journal_file = #{file}
+		</if>
+		where journal_seq = #{seq}
+		and id = #{id}
+	</update>
+	
+	<delete id="delete_journal" parameterType="hashmap">
+		delete from journal_tb
+		where  journal_seq = #{seq} 
+		and id = #{id}
+	
+	</delete>	
+	
+	<insert id="insert_user" parameterType="hashmap">
+		insert into user
+		(id,
+		password,
+		name,
+		graduation_major,
+		class_num,
+		graduation_y,
+		major,
+		birth,
+		phone,
+		email,
+		company,
+		company_rank,
+		company_phone,
+		job_field,
+		company_addr,
+		l_company,
+		residential,
+		home_phone,
+		addr,
+		hobby,
+		memo,
+		modify_date,
+		intra_date,
+		security_code)
+		values(
+		#{id},
+		#{password},
+		#{name},
+		#{graduation_major},
+		#{class_num},
+		#{graduation_y},
+		#{major},
+		#{birth},
+		#{phone},
+		#{email},
+		#{company},
+		#{company_rank},
+		#{company_phone},
+		#{job_field},
+		#{company_addr},
+		#{l_company},
+		#{residential},
+		#{home_phone},
+		#{addr},
+		#{hobby},
+		#{memo},
+		now(),
+		now(),
+		#{security_code})
+	
+	</insert>
+	
+	<update id="update_otheruser" parameterType="hashmap">
+	
+		update user set
+		id               =  #{id},
+		password         =  #{password},
+		<!-- name             =  #{name}, -->
+		graduation_major =  #{graduation_major},
+		class_num        =  #{class_num},
+		graduation_y     =  #{graduation_y},
+		major            =  #{major},
+		<!-- birth            =  #{birth}, -->
+		phone            =  #{phone},
+		email            =  #{email},
+		company          =  #{company},
+		company_rank     =  #{company_rank},
+		company_phone    =  #{company_phone},
+		job_field        =  #{job_field},
+		company_addr     =  #{company_addr},
+		l_company        =  #{l_company},
+		residential      =  #{residential},
+		home_phone       =  #{home_phone},
+		addr             =  #{addr},
+		hobby            =  #{hobby},
+		memo             =  #{memo},
+		modify_date      =  now(),
+		intra_date       =  now(),
+		security_code    =  #{security_code}
+		where name = #{name}
+		and birth = #{birth}
+	
+	
+	
+	
+	
+	
+	
+	</update>
+	
+	
+	<select id="select_otheruser" parameterType="hashmap" resultType="hashmap">
+	
+		select name, birth,	ifnull(graduation_major,'')AS graduation_major
+		, ifnull(class_num,'') AS class_num
+		, ifnull(graduation_y,'') as graduation_y
+		, ifnull(major,'') AS major
+		 from user
+		where name = #{name}
+		and birth = #{birth}
+		and id = ''
+	
+	
+	</select>
+	
+	<select id="select_otheruser2" parameterType="hashmap" resultType="hashmap">
+		select 
+		name,
+		graduation_major,
+		class_num,
+		graduation_y,
+		major,
+	    SUBSTRING_INDEX(birth, '-', 1) AS birth_y,
+	    SUBSTRING_INDEX(SUBSTRING_INDEX(birth, '-', 2),'-',-1) AS birth_m,
+        SUBSTRING_INDEX(birth, '-', -1) AS birth_d,
+		phone,
+		email,
+		company,
+		company_rank,
+		company_phone,
+		job_field,
+		SUBSTRING_INDEX(company_addr, '|', 1) AS company_addr1	,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(company_addr, '|', 2),'|',-1) AS company_addr2,
+		SUBSTRING_INDEX(company_addr, '|', -1) AS company_addr3 ,
+		l_company,
+		residential,
+		home_phone,
+		SUBSTRING_INDEX(addr, '|', 1) AS addr1	,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(addr, '|', 2),'|',-1) AS addr2,
+		SUBSTRING_INDEX(addr, '|', -1) AS addr3 ,
+		hobby,
+		memo
+		
+		
+		
+		from user
+		where name = #{name}
+		and birth = #{birth}
+		and id = ''
+	</select>
+	
+	
+	<select id="select_idcheck" parameterType="hashmap" resultType="string">
+		select id from user
+		where id = #{id}
+	</select>
+	
+	<select id="select_mypage" parameterType="hashmap" resultType="hashmap">
+		select 
+		id,
+		name,
+		graduation_major,
+		class_num,
+		graduation_y,
+		major,
+	    SUBSTRING_INDEX(birth, '-', 1) AS birth_y,
+	    SUBSTRING_INDEX(SUBSTRING_INDEX(birth, '-', 2),'-',-1) AS birth_m,
+        SUBSTRING_INDEX(birth, '-', -1) AS birth_d,
+		phone,
+		email,
+		company,
+		company_rank,
+		company_phone,
+		job_field,
+		SUBSTRING_INDEX(company_addr, '|', 1) AS company_addr1	,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(company_addr, '|', 2),'|',-1) AS company_addr2,
+		SUBSTRING_INDEX(company_addr, '|', -1) AS company_addr3 ,
+		l_company,
+		residential,
+		home_phone,
+		SUBSTRING_INDEX(addr, '|', 1) AS addr1	,
+		SUBSTRING_INDEX(SUBSTRING_INDEX(addr, '|', 2),'|',-1) AS addr2,
+		SUBSTRING_INDEX(addr, '|', -1) AS addr3 ,
+		hobby,
+		memo
+ 		from user
+		where id = #{id}
+	</select>
+	
+	
+</mapper>
