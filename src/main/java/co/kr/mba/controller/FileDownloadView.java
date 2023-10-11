@@ -23,7 +23,7 @@ public class FileDownloadView extends AbstractView{
 		String filepath = (String) model.get("filepath");
 		 /*String defaultPath = httpSession.getServletContext().getRealPath("/");
          File file = new File(defaultPath+File.separator +"resources"+File.separator +"naver" +File.separator + fileName);*/
-		// 파일을 읽어오는 스트림 얻기
+		// 파일을 읽어오는 스트림
 		//File file = new File("C:/workspace/vcatch/src/main/webapp/resources/file", filename);
 		File file = new File(filepath, filename);
 		
