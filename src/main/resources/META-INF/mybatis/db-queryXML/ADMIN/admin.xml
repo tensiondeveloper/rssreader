@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.mba.dao.AdminDao">
+	
+	<select id="select_basics" resultType="hashmap">
+		select * from site_info
+		where seq = 'mba'
+	
+	</select>
+	
+	<select id="select_groupadmin" parameterType="hashmap" resultType="hashmap">
+		select * from group_tb
+	
+	</select>
+	<select id="select_groupadmin2" parameterType="hashmap" resultType="hashmap">
+		select * from group2_tb
+	
+	</select>
+	
+	<update id="update_group" parameterType="hashmap">
+		update group_tb set
+		<if test="type eq 1">
+			headname = #{txt}
+		</if>
+		<if test='type eq 2'>
+			name = #{txt}
+		</if>
+		where depth = #{num}
+	</update>
+	
+	<select id="select_donation" parameterType="hashmap" resultType="hashmap">
+		select * from donation_tb
+		where 1 = 1
+		<if test="type eq 500">
+			and donation_pay > 5000000
+		</if>
+		<if test="type eq 200">
+			and donation_pay &lt; 5000000 and donation_pay > 2000000 
+		</if>
+		<if test="type eq 30">
+			and donation_pay &lt; 2000000 and donation_pay > 300000
+		</if>
+		<if test="type eq 1">
+			and donation_pay &lt; 300000 
+		</if>
+	</select>
+	
+	
+	<update id="update_siteinfo" parameterType="hashmap">
+	
+		update site_info set
+	
+		addr = #{addr},
+		office_number = #{number} ,
+		email= #{email},
+		map_latitude= #{latitude},
+		map_longitude= #{longitude},
+		admin1_name=  #{admin1_name},
+		admin1_phone= #{admin1_phone},
+		admin1_email= #{admin1_email},
+		admin2_name= #{admin2_name},
+		admin2_phone= #{admin2_phone},
+		admin2_email= #{admin2_email}
+		where seq = 'mba'
+	
+	</update>
+	<insert id="insert_group" parameterType="hashmap">
+		insert into group2_tb(headname,name,imgsrc)
+		values(#{headname},#{name},#{imgsrc})
+	</insert>
+	<update id="update_group2" parameterType="hashmap">
+		update group2_tb set
+		headname = #{headname},
+	  	<if test="imgsrc != ''">
+			imgsrc = #{imgsrc},
+	    </if>
+		name = #{name}
+		where seq = #{seq}
+	
+	</update>
+	<delete id="delete_group2" parameterType="hashmap">
+		delete from group2_tb
+		where seq = #{seq}
+	</delete>
+	<delete id="delete_commu" parameterType="hashmap">
+		delete from board_tb
+		where board_seq = #{seq}
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+	
+	<select id="Select_journal_tb" parameterType="hashmap" resultType="hashmap">
+		select * from journal_tb
+		order by journal_seq desc
+		limit ${page},20
+	</select>
+	<select id="Select_journal_total" parameterType="hashmap" resultType="int">
+		select  count(*) from journal_tb
+		order by journal_seq desc
+	</select>
+	
+	<delete id="delete_journal" parameterType="hashmap">
+		delete from journal_tb
+		where journal_seq = #{seq}
+	</delete>
+	<insert id="insert_donauser" parameterType="hashmap">
+		insert into donation_tb(
+		donation_name,
+		donation_company,
+		donation_class,
+		donation_pay,
+		donation_date,
+		donation_img)
+		values(#{name},#{company},#{mclass},#{pay},now(),#{img})
+	
+	</insert>
+	
+
+	
+	<update id="update_donauser" parameterType="hashmap">
+		update donation_tb set
+		donation_name = #{name},
+		donation_company = #{company},
+		donation_class = #{mclass},
+		donation_pay = #{pay},
+		donation_date = now(),
+	 	<if test="imgsrc != ''">
+			donation_img =#{img}
+	    </if>
+		where donation_seq  = #{seq}
+		 
+	</update>
+	
+	
+	
+	
+	
+	
+	
+</mapper>

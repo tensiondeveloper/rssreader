@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="co.kr.mba.dao.Boarddao">
+	
+	
+	<!-- %Y-%m-%d %H:%i:%S --> <!-- like CONCAT('%',#{client_name},'%') -->
+	<select id="Select_Board" parameterType="hashmap" resultType="hashmap">
+		select board_seq,board_type,id,board_title,board_content,board_filename,Date_format(board_date,"%Y-%m-%d") as board_date,board_flag,board_count from BOARD_TB
+		where board_type = #{type}
+	    <if test="search == 'title_content'">
+			and board_title like CONCAT('%', #{keyword},'%')
+			and board_content like CONCAT('%', #{keyword},'%')
+	    </if>
+		
+	    <if test="search == 'id'">
+		    and id like CONCAT('%', #{keyword},'%')
+	    </if>
+		
+		order by board_seq desc
+		limit ${page},20
+	</select>
+	<select id="Select_Board_total" parameterType="hashmap" resultType="int">
+		select count(*) from BOARD_TB
+		where board_type = #{type}
+		 <if test="search == 'title_content'">
+			and board_title like CONCAT('%', #{keyword},'%')
+			and board_content like CONCAT('%', #{keyword},'%')
+	    </if>
+		
+	    <if test="search == 'id'">
+		    and id like CONCAT('%', #{keyword},'%')
+	    </if>
+	</select>
+	
+	<insert id="Insert_Board" parameterType="hashmap">
+		insert BOARD_TB(board_type,id,board_title,board_content,board_filename,board_date)
+		values(#{board_type},#{id},#{board_title},#{board_content},#{board_filename},now())
+	</insert>	
+	<select id="Select_Board_Seq" parameterType="hashmap" resultType="hashmap">
+		select board_seq,board_type,id,board_title,board_content,board_filename,Date_format(board_date,"%Y-%m-%d") as board_date,board_flag,board_count from BOARD_TB
+		where board_seq = #{seq}
+	</select>
+	<delete id="Delete_Board_seq" parameterType="hashmap">
+		delete from Board_TB
+		where board_seq  = #{seq}
+	</delete>
+	<delete id="Delete_reply_seq" parameterType="hashmap">
+		delete from Boardreply_TB
+		where board_seq  = #{seq}
+	</delete>
+	<delete id="Delete_reply_choice_seq" parameterType="hashmap">
+		delete from Boardreply_TB
+		where reply_seq  = #{seq}
+		and id = #{id}
+	</delete>
+	
+	
+	<select id="Select_Reply_board" parameterType="hashmap" resultType="hashmap">
+		select * from Boardreply_TB
+		where board_seq= #{seq}
+	</select>
+	
+	<insert id="Insert_Reply_add" parameterType="hashmap">
+		insert Boardreply_TB(id,reply_content,board_type,board_seq,reply_date)
+		values(#{id},#{reply_content},#{board_type},#{board_seq},now())
+	</insert>	
+	
+	
+	<update id="Update_Board_count" parameterType="hashmap">
+		update BOARD_TB SET
+		BOARD_COUNT = BOARD_COUNT+1
+		WHERE BOARD_SEQ = #{seq}
+	</update>
+	
+	
+	<select id="select_board_auth" parameterType="string" resultType="hashmap">
+		select * from board_tb
+		where board_seq = #{seq}
+	
+	</select>
+	<update id="update_board_seq" parameterType="hashmap">
+		update board_tb set
+		board_title = #{title},
+		board_content = #{content},
+		board_filename = #{filename}
+		where board_seq = #{seq}
+	</update>
+	
+	
+	<!-- contact board -->
+	
+	
+	<select id="Select_contact_Board" parameterType="hashmap" resultType="hashmap">
+		SELECT a.board_seq,a.board_seq,a.id,a.board_title,a.board_content,a.board_filename,Date_format(a.board_date,"%Y-%m-%d") AS board_date,a.board_count,a.board_flag,b.cnt FROM contactboard_tb AS a LEFT join (SELECT COUNT(*) AS cnt,board_seq from contactreply_tb
+		GROUP BY board_seq) AS b
+		on a.board_seq = b.board_seq
+		order by board_seq desc
+		limit ${page},20
+	</select>
+	<select id="Select_contact_Board_total" parameterType="hashmap" resultType="int">
+		SELECT count(*) FROM contactboard_tb AS a LEFT join (SELECT COUNT(*) AS cnt,board_seq from contactreply_tb
+		GROUP BY board_seq) AS b
+		on a.board_seq = b.board_seq
+	</select>
+	
+	<insert id="Insert_contact_Board" parameterType="hashmap">
+		insert contactboard_tb(board_type,id,board_title,board_content,board_filename,board_date)
+		values(#{board_type},#{id},#{board_title},#{board_content},#{board_filename},now())
+	</insert>	
+	<select id="Select_contact_Board_Seq" parameterType="hashmap" resultType="hashmap">
+		select board_seq,board_type,id,board_title,board_content,board_filename,Date_format(board_date,"%Y-%m-%d") as board_date,board_flag,board_count from contactboard_tb
+		where board_seq = #{seq}
+	</select>
+	<delete id="Delete_contact_Board_seq" parameterType="hashmap">
+		delete from contactboard_tb
+		where board_seq  = #{seq}
+	</delete>
+	<delete id="Delete_contact_reply_seq" parameterType="hashmap">
+		delete from contactreply_TB
+		where board_seq  = #{seq}
+	</delete>
+	
+	
+	<select id="Select_contact_Reply_board" parameterType="hashmap" resultType="hashmap">
+		select * from contactreply_TB
+		where board_seq= #{seq}
+	</select>
+	
+	<insert id="Insert_contact_Reply_add" parameterType="hashmap">
+		insert contactreply_TB(id,reply_content,board_type,board_seq,reply_date)
+		values(#{id},#{reply_content},#{board_type},#{board_seq},now())
+	</insert>	
+	
+	
+	<update id="Update_contact_Board_count" parameterType="hashmap">
+		update contactboard_tb SET
+		BOARD_COUNT = BOARD_COUNT+1
+		WHERE BOARD_SEQ = #{seq}
+	</update>
+	
+	
+	<select id="select_contact_board_auth" parameterType="string" resultType="hashmap">
+		select * from contactboard_tb
+		where board_seq = #{seq}
+	
+	</select>
+	<update id="update_contact_board_seq" parameterType="hashmap">
+		update contactboard_tb set
+		board_title = #{title},
+		board_content = #{content},
+		board_filename = #{filename}
+		where board_seq = #{seq}
+	</update>
+	
+	<!-- read board -->
+	
+	
+	<select id="Select_read_Board" parameterType="hashmap" resultType="hashmap">
+		SELECT a.board_seq,a.board_seq,a.id,a.board_title,a.board_content,a.board_filename,Date_format(a.board_date,"%Y-%m-%d") AS board_date,a.board_count,a.board_flag,b.cnt FROM readboard_tb AS a LEFT join (SELECT COUNT(*) AS cnt,board_seq from readboardreply_tb
+		GROUP BY board_seq) AS b
+		on a.board_seq = b.board_seq
+		where board_type = #{type}
+	    <if test="search == 'title_content'">
+			and board_title like CONCAT('%', #{keyword},'%')
+			and board_content like CONCAT('%', #{keyword},'%')
+	    </if>
+		
+	    <if test="search == 'id'">
+		    and id like CONCAT('%', #{keyword},'%')
+	    </if>
+		order by board_seq desc
+		limit ${page},20
+	</select>
+	<select id="Select_read_Board_total" parameterType="hashmap" resultType="int">
+		SELECT count(*) FROM readboard_tb AS a LEFT join (SELECT COUNT(*) AS cnt,board_seq from readboardreply_tb
+		GROUP BY board_seq) AS b
+		on a.board_seq = b.board_seq
+		where board_type = #{type}
+	    <if test="search == 'title_content'">
+			and board_title like CONCAT('%', #{keyword},'%')
+			and board_content like CONCAT('%', #{keyword},'%')
+	    </if>
+		
+	    <if test="search == 'id'">
+		    and id like CONCAT('%', #{keyword},'%')
+	    </if>
+	</select>
+	
+	<insert id="Insert_read_Board" parameterType="hashmap">
+		insert readboard_tb(board_type,id,board_title,board_content,board_filename,board_date)
+		values(#{board_type},#{id},#{board_title},#{board_content},#{board_filename},now())
+	</insert>	
+	<select id="Select_read_Board_Seq" parameterType="hashmap" resultType="hashmap">
+		select board_seq,board_type,id,board_title,board_content,board_filename,Date_format(board_date,"%Y-%m-%d") as board_date,board_flag,board_count from readboard_tb
+		where board_seq = #{seq}
+	</select>
+	<delete id="Delete_read_Board_seq" parameterType="hashmap">
+		delete from readboard_tb
+		where board_seq  = #{seq}
+	</delete>
+	<delete id="Delete_read_reply_seq" parameterType="hashmap">
+		delete from readboardreply_TB
+		where board_seq  = #{seq}
+	</delete>
+	<delete id="Delete_read_reply_choice_seq" parameterType="hashmap">
+		delete from readboardreply_TB
+		where reply_seq  = #{seq}
+		and id = #{id}
+	</delete>
+	
+	
+	<select id="Select_read_Reply_board" parameterType="hashmap" resultType="hashmap">
+		select * from readboardreply_TB
+		where board_seq= #{seq}
+	</select>
+	
+	<insert id="Insert_read_Reply_add" parameterType="hashmap">
+		insert readboardreply_TB(id,reply_content,board_type,board_seq,reply_date)
+		values(#{id},#{reply_content},#{board_type},#{board_seq},now())
+	</insert>	
+	
+	
+	<update id="Update_read_Board_count" parameterType="hashmap">
+		update readboard_tb SET
+		BOARD_COUNT = BOARD_COUNT+1
+		WHERE BOARD_SEQ = #{seq}
+	</update>
+	
+	
+	<select id="select_read_board_auth" parameterType="string" resultType="hashmap">
+		select * from readboard_tb
+		where board_seq = #{seq}
+	
+	</select>
+	<update id="update_read_board_seq" parameterType="hashmap">
+		update readboard_tb set
+		board_title = #{title},
+		board_content = #{content},
+		board_filename = #{filename}
+		where board_seq = #{seq}
+	</update>
+	
+	
+</mapper>

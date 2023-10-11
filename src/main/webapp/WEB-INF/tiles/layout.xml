@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+
+	<definition name="index" template="/WEB-INF/views/layout/templateindex.jsp">
+			<put-attribute name="header" value="/WEB-INF/views/layout/header.jsp" />   
+			<put-attribute name="side" value="/WEB-INF/views/layout/sider.jsp" />   
+			<put-attribute name="footer" value="/WEB-INF/views/layout/footer.jsp" />   
+	</definition>
+	<definition name="home" template="/WEB-INF/views/layout/template.jsp">
+			<put-attribute name="header" value="/WEB-INF/views/layout/header.jsp" />   
+			<put-attribute name="side" value="" />   
+			<put-attribute name="footer" value="/WEB-INF/views/layout/footer.jsp" />   
+	</definition>
+
+	
+	<definition name="defalt/test" template="/WEB-INF/views/defalt/test.jsp">
+		<put-attribute name="contents" value=""></put-attribute>
+		</definition>
+	
+	
+ 	<definition name="main/*" extends="index" >
+ 		<put-attribute name="contents" value="/WEB-INF/views/main/{1}.jsp"/>
+ 	
+ 	
+ 	</definition>
+ <!-- 	<definition name="home/board/*" extends="index" >
+ 		<put-attribute name="contents" value="/WEB-INF/views/home/board/{1}.jsp"/>
+ 	</definition> -->
+ 	<definition name="notemplet/*" extends="home" >
+ 		<put-attribute name="contents" value="/WEB-INF/views/home/notemplet/{1}.jsp"/>
+ 	
+ 	
+ 	</definition>
+	<!-- 
+ 	<definition name="intro/*" extends="home" >
+ 		<put-attribute name="contents" value="/WEB-INF/views/home/intro/{1}.jsp"/>
+ 		<put-attribute name="sider" value="/WEB-INF/views/home/intro/introside.jsp" />   
+ 	
+ 	</definition>
+ 	
+ 
+ 	
+ 	<definition name="commu/*" extends="home" >
+ 		<put-attribute name="contents" value="/WEB-INF/views/home/commu/{1}.jsp"/>
+ 		<put-attribute name="sider" value="/WEB-INF/views/home/commu/commuside.jsp" />   
+ 	
+ 	</definition>
+ 	
+ 	<definition name="read/*" extends="home" >
+ 		<put-attribute name="contents" value="/WEB-INF/views/home/read/{1}.jsp"/>
+ 		<put-attribute name="sider" value="/WEB-INF/views/home/read/readside.jsp" />   
+ 	
+ 	</definition>
+	<definition name="whitetem/read_journal" template="/WEB-INF/views/home/whitetem/read_journal.jsp">
+			<put-attribute name="contents" value=""></put-attribute>
+	</definition>
+	
+	
+	
+	
+	
+	
+	
+	<definition name="admin" template="/WEB-INF/views/admin/template.jsp">
+			<put-attribute name="sider" value="/WEB-INF/views/admin/layout/side.jsp" />   
+			<put-attribute name="footer" value="/WEB-INF/views/admin/layout/footer.jsp" />   
+			<put-attribute name="header" value="/WEB-INF/views/admin/layout/header.jsp" />   
+	</definition>
+
+	<definition name="admin/*" extends="admin" >
+ 		<put-attribute name="contents" value="/WEB-INF/views/admin/{1}.jsp"/>
+ 	</definition> -->
+<!-- 
+	 <definition name="main" template="/WEB-INF/views/home.jsp">
+		<put-attribute name="aside" value="/WEB-INF/views/visitor/aside_visitor.jsp" />   
+	</definition>
+	
+	<definition name="visitor/*" extends="main">
+		<put-attribute name="content" value="/WEB-INF/views/visitor/{1}.jsp" />   
+	</definition> 
+	 -->
+	<!-- 
+	 <definition name="excelimport/blogerlist_to_excel" template="/WEB-INF/views/accredit/blogerlist_to_excel.jsp">
+		<put-attribute name="contents" value=""></put-attribute>
+	</definition>
+	<definition name="excelimport/ave_to_excel" template="/WEB-INF/views/accredit/ave_to_excel.jsp">
+		<put-attribute name="contents" value=""></put-attribute>
+	</definition> -->
+</tiles-definitions>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/task
+		http://www.springframework.org/schema/task/spring-task.xsd">
+
+	<context:annotation-config></context:annotation-config>
+	<context:component-scan base-package="co.kr.mba.serviceimpl"></context:component-scan>
+	
+<!-- META-INF/properties 파일 읽는 객체 등록 -->
+	<context:property-placeholder location="classpath:/META-INF/properties/*.properties"/>
+
+<!-- 
+	mybatis 설정
+	1. Connection Pool 만들기
+	2. SqlSessionFactory 만들어주는 SqlSessionFactoryBean 등록하기
+	3. xxxDao 인터페이스들 스캔해서 구현객체 만드는 MapperScannerConfigurer 등록하기
+ -->
+ 
+<!-- connection pool 객체 등록 -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${db.driver}"></property>
+		<property name="url" value="${db.url}"></property>
+		<property name="username" value="${db.username}"></property>
+		<property name="password" value="${db.password}"></property>
+		
+		
+	</bean>
+
+<!-- mybatis 관련 객체 등록 -->
+<!-- SqlSessionFactory 만들어주는 SqlSessionFactoryBean 등록 -->
+	<bean class="org.mybatis.spring.SqlSessionFactoryBean"
+		p:dataSource-ref="dataSource"
+		p:configLocation="classpath:/META-INF/mybatis/mybatis-config.xml"
+	/>
+	
+<!-- mybatis 관련객체(Dao 를 스캔해서 객체를 만들어주는 설정) -->
+<!-- Dao 인터페이들을 스캔해서 구현객체 만드는 MapperScannerConfigurer 등록 -->	
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"
+		p:basePackage="co.kr.mba.dao"
+	/>
+	
+<!-- 트랜잭션매니저 관련 객체 등록 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource"
+	/>
+	<tx:annotation-driven/>
+	
+	
+	
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="smtp.gmail.com"></property>
+		<property name="port" value="587"></property>
+		<property name="username" value="vcatct.mkthd@gmail.com"></property>
+		<property name="password" value="zxcv1234!"></property>
+		<property name="javaMailProperties">
+			<props>
+				 <prop key="mail.smtp.ssl.trust">smtp.gmail.com</prop>
+				<prop key="mail.smtp.auth">true</prop>
+				<prop key="mail.smtp.starttls.enable">true</prop>
+			</props>
+		</property>
+	</bean>
+	
+ 
+ 	<!-- 스케쥴러 설정 -->
+	 <context:component-scan base-package="co.kr.mba.scheduler" />
+	<task:scheduler id="jobScheduler" pool-size="10"/>
+	<task:annotation-driven scheduler="jobScheduler"/> 
+</beans>

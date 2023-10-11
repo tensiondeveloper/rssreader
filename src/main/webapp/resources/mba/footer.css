@@ -1,0 +1,23 @@
+@charset "UTF-8";
+
+.square-top{
+	width: 15px;
+	height:13px;
+	border-top: 3px solid white;
+	
+}
+
+
+@media (max-width: 992px){
+	.footer-one > p {
+  	  text-align: center
+	}
+	.footer-one > div {
+	  margin: 0 auto;
+	}
+	.footer-two{
+	  text-align: center;
+ 	   margin-top: 10px;
+	}
+
+}

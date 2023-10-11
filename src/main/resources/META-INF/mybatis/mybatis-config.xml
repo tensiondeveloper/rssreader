@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<typeAliases>
+	
+		<typeAlias alias="userVO" 		type="co.kr.mba.vo.userVO" />
+		
+		
+	</typeAliases>
+      
+  <!-- SQL 이 정의된 mapper파일을 등록한다. -->
+	<mappers>
+ 		<mapper resource="/META-INF/mybatis/db-queryXML/API/api.xml"/>
+ 	<!-- 	<mapper resource="/META-INF/mybatis/db-queryXML/API/BOARD.xml"/>
+ 		<mapper resource="/META-INF/mybatis/db-queryXML/API/etc.xml"/>
+
+ 		<mapper resource="/META-INF/mybatis/db-queryXML/ADMIN/admin.xml"/> -->
+	</mappers>
+</configuration>
